@@ -1,0 +1,15 @@
+add_catch(
+        test_image_processor
+        test.cpp
+        ../controller.cpp
+        ../crop.cpp
+        ../edge_detection.cpp
+        ../filterwithmatrix.cpp
+        ../Grayscale.cpp
+        ../MyFilter.cpp
+        ../parser.cpp
+        ../image.cpp
+        ../read_image.cpp
+        ../write_image.cpp
+        ../negative.cpp
+)

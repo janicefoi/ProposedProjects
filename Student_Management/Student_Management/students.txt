@@ -1,0 +1,5 @@
+Name,ID,Type,Course,Address,Contact,Assignment,SmallExam,FinalExam,Tutorial,FinalResult
+John Doe,ST123,Local,MSc SE,Paris,0123456789,50.00,60.00,70.00,80.00,66.00
+Jane Smith,ST456,Int,MSc DSA,Lyon,0987654321,10.00,60.00,70.00,80.00,58.00
+S,1,Int,MSc SE,T,1,75.00,90.00,70.00,80.00,77.00
+aa,1,Local,MSc SE,a,4,4.00,4.00,4.00,4.00,4.00
