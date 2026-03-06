@@ -11,7 +11,7 @@ typedef struct Student
 {
     char studentName[50];
     char studentId[15];
-    char studentDept[10];
+    char studentDept[20];
     char studentCourse[30];
     char studentAddress[100];
     char studentContactNum[15];
@@ -31,11 +31,19 @@ void deleteInfo();
 void searchInfo();
 void exportToText();
 void importFromText();
+void showReports();
 
 float calculateFinal(Student s);
-void displayFinalResult(Student s);
-int   idExists(const char* id);
+float calculateAttendance(Student s);
+int idExists(const char* id);
 
+void inputString(const char* label, char* buffer, int size);
+float getValidMark(const char* label);
+void getValidAttendance(Student* s);
+void chooseDepartment(Student* s);
+void chooseCourse(Student* s);
+void printStudentFull(Student s);
+void printStudentRow(Student s);
 
 
 int main()
@@ -53,6 +61,7 @@ int main()
         printf("\n\t\t\t5. Search Student Information");
         printf("\n\t\t\t6. Export Data to Text File");
         printf("\n\t\t\t7. Import Edited Text File");
+        printf("\n\t\t\t8. Reports & Analytics");
         printf("\n\t\t\t0. Exit");
 
         printf("\n\n\n\t\t\tEnter Your Option: ");
@@ -67,6 +76,7 @@ int main()
         case '5': searchInfo();      break;
         case '6': exportToText();    break;
         case '7': importFromText();  break;
+        case '8': showReports();     break;
         case '0':
             printf("\n\t\t\t====== Thank You ======");
             break;
@@ -92,94 +102,21 @@ void createAccount()
 
     printf("\t\t\t====== Create Student Account ======\n");
 
-    printf("\n\t\t\tEnter Student's Name : ");
     getchar();
-    gets_s(studentInformation.studentName);
 
-    printf("\t\t\tEnter Student's ID : ");
-    gets_s(studentInformation.studentId);
+    inputString("\tEnter Name: ", studentInformation.studentName, 50);
+    inputString("\tEnter ID: ", studentInformation.studentId, 15);
 
     // Check for duplicate ID
-    while (idExists(studentInformation.studentId)) {
-        printf("\n\t\t\tThis ID already exists! Enter a different ID: ");
-        gets_s(studentInformation.studentId);
-    }
+    while (idExists(studentInformation.studentId))
+        inputString("\tID exists! Enter another ID: ", studentInformation.studentId, 15);
 
-    {
-        int typeChoice = 0;
-        printf("\t\t\tSelect Student Dept:\n\t\t\t1. Local\n\t\t\t2. International\n\t\t\tEnter choice (1-2): ");
-        while (1)
-        {
-            if (scanf("%d", &typeChoice) != 1)
-            {
-                int c; while ((c = getchar()) != '\n' && c != EOF);
-                printf("\n\t\t\tInvalid input. Enter 1 for Local or 2 for International: ");
-                continue;
-            }
-            if (typeChoice == 1)
-            {
-                strcpy(studentInformation.studentDept, "Local");
-                break;
-            }
-            else if (typeChoice == 2)
-            {
-                strcpy(studentInformation.studentDept, "Int");
-                break;
-            }
-            else
-            {
-                printf("\n\t\t\tInvalid choice. Enter 1 or 2: ");
-            }
-        }
-        getchar();
-    }
-    {
-        int courseChoice = 0;
-        printf("\t\t\tSelect Course:\n\t\t\t1. MSc SE\n\t\t\t2. MSc DSA\n\t\t\t3. MSc CS\n\t\t\t4. MSc AIS\n\t\t\t5. MSc AIMS\n\t\t\tEnter choice (1-5): ");
-        while (1)
-        {
-            if (scanf("%d", &courseChoice) != 1)
-            {
-                int c; while ((c = getchar()) != '\n' && c != EOF);
-                printf("\n\t\t\tInvalid input. Enter a number 1-5: ");
-                continue;
-            }
-            if (courseChoice == 1)
-            {
-                strcpy(studentInformation.studentCourse, "MSc SE");
-                break;
-            }
-            else if (courseChoice == 2)
-            {
-                strcpy(studentInformation.studentCourse, "MSc DSA");
-                break;
-            }
-            else if (courseChoice == 3)
-            {
-                strcpy(studentInformation.studentCourse, "MSc CS");
-                break;
-            }
-            else if (courseChoice == 4)
-            {
-                strcpy(studentInformation.studentCourse, "MSc AIS");
-                break;
-            }
-            else if (courseChoice == 5)
-            {
-                strcpy(studentInformation.studentCourse, "MSc AIMS");
-                break;
-            }
-            else
-            {
-                printf("\n\t\t\tInvalid choice. Enter 1-5: ");
-            }
-        }
-        getchar();
-    }
-    printf("\t\t\tEnter Student's Address : ");
-    gets_s(studentInformation.studentAddress);
-    printf("\t\t\tEnter Student's Contact Number : ");
-    gets_s(studentInformation.studentContactNum);
+    chooseDepartment(&studentInformation);
+    chooseCourse(&studentInformation);
+
+    inputString("\tEnter Address: ", studentInformation.studentAddress, 100);
+    inputString("\tEnter Contact: ", studentInformation.studentContactNum, 15);
+
 
     printf("\t\t\tEnter Assignment Marks : ");
     scanf("%f", &studentInformation.marksAssignment);
@@ -190,18 +127,13 @@ void createAccount()
     printf("\t\t\tEnter Tutorial Marks : ");
     scanf("%f", &studentInformation.marksTutorial);
 
-    printf("\t\t\tEnter Total Classes Conducted: ");
-    scanf("%d", &studentInformation.totalClasses);
+    /*studentInformation.marksAssignment = getValidMark("\tAssignment Marks");
+    studentInformation.marksAssignment = getValidMark("\tAssignment Marks");
+    studentInformation.marksSmallExam = getValidMark("\tSmall Exam Marks");
+    studentInformation.marksFinalExam = getValidMark("\tFinal Exam Marks");
+    studentInformation.marksTutorial = getValidMark("\tTutorial Marks");*/
 
-    printf("\t\t\tEnter Classes Attended: ");
-    scanf("%d", &studentInformation.attendedClasses);
-
-    while (studentInformation.attendedClasses > studentInformation.totalClasses ||
-        studentInformation.attendedClasses < 0)
-    {
-        printf("\t\t\tInvalid attendance. Enter again: ");
-        scanf("%d", &studentInformation.attendedClasses);
-    }
+    getValidAttendance(&studentInformation);
 
     fwrite(&studentInformation, sizeof(studentInformation), 1, fileOne);
 
@@ -210,23 +142,6 @@ void createAccount()
     _getch();
 
     fclose(fileOne);
-}
-
-float calculateFinal(Student s)
-{
-    //Calculate Final Marks
-
-    return (s.marksFinalExam * 0.40f) +
-        (s.marksAssignment * 0.20f) +
-        (s.marksSmallExam * 0.20f) +
-        (s.marksTutorial * 0.20f);
-
-}
-
-void displayFinalResult(Student s)
-{
-    //float result = calculateFinal(s); 
-    printf("\n\t\t\tFinal Result : %.2f\n", calculateFinal(s));
 }
 
 void displayInfo()
@@ -250,6 +165,10 @@ void displayInfo()
 
     printf("\t\t---------------------------------------------------------------------------------------------");
 
+    while (fread(&stundentInformation, sizeof(stundentInformation), 1, fileOne) == 1)
+    {
+        printStudentRow(stundentInformation);
+    }
 
     printf("\n\n\t\tEnter any keys to continue.......");
     _getch();
@@ -529,7 +448,18 @@ void searchInfo()
                 printf("\n\t\t\tFinal Exam Marks : %.2f", studentInformation.marksFinalExam);
                 printf("\n\t\t\tTutorial Marks : %.2f", studentInformation.marksTutorial);
 
-                displayFinalResult(studentInformation);
+                printf("\n\t\t\tAttendance: %.2f%%", calculateAttendance(studentInformation));
+
+                float att = calculateAttendance(studentInformation);
+                if (att < 50)
+                    printf("\n\t\t\tStatus: CRITICAL (Below 50%%)");
+                else if (att < 75)
+                    printf("\n\t\t\tStatus: WARNING (Below 75%%)");
+                else
+                    printf("\n\t\t\tStatus: OK");
+
+
+                calculateFinal(studentInformation);
 
             }
         }
@@ -557,7 +487,7 @@ void searchInfo()
             if (schoice == 1)
                 strcpy(studentDept, "Local");
             else if (schoice == 2)
-                strcpy(studentDept, "International");
+                strcpy(studentDept, "Int");
             else
             {
                 printf("\n\t\t\tInvalid choice. Returning to menu.\n");
@@ -681,23 +611,247 @@ void importFromText()
     _getch();
 }
 
-int idExists(const char* id) {
+void showReports()
+{
     FILE* file = fopen("studentInfo.bin", "rb");
-    if (!file) return 0; // No file yet → no duplicates
+    if (!file)
+    {
+        printf("\n\t\t\tError opening file!\n");
+        _getch();
+        return;
+    }
 
     Student s;
-    while (fread(&s, sizeof(Student), 1, file) == 1) {
-        if (strcmp(s.studentId, id) == 0) {
-            fclose(file);
-            return 1; // ID found
+    int total = 0;
+    float sumFinal = 0;
+
+    float highestScore = -1;
+    float lowestScore = 9999;
+
+    Student topStudent, lowStudent;
+
+    int countLocal = 0, countInternational = 0;
+    int countSE = 0, countDSA = 0, countCS = 0, countAIS = 0, countAIMS = 0;
+
+    while (fread(&s, sizeof(Student), 1, file) == 1)
+    {
+        float final = calculateFinal(s);
+
+        // Track highest
+        if (final > highestScore)
+        {
+            highestScore = final;
+            topStudent = s;
         }
+
+        // Track lowest
+        if (final < lowestScore)
+        {
+            lowestScore = final;
+            lowStudent = s;
+        }
+
+        // Sum for average
+        sumFinal += final;
+        total++;
+
+        // Count departments
+        if (_stricmp(s.studentDept, "Local") == 0)
+            countLocal++;
+        else
+            countInternational++;
+
+        // Count courses
+        if (strcmp(s.studentCourse, "MSc SE") == 0) countSE++;
+        else if (strcmp(s.studentCourse, "MSc DSA") == 0) countDSA++;
+        else if (strcmp(s.studentCourse, "MSc CS") == 0) countCS++;
+        else if (strcmp(s.studentCourse, "MSc AIS") == 0) countAIS++;
+        else if (strcmp(s.studentCourse, "MSc AIMS") == 0) countAIMS++;
     }
 
     fclose(file);
-    return 0; // ID not found
+
+    system("cls");
+    printf("\t\t====== Reports & Analytics ======\n\n");
+
+    if (total == 0)
+    {
+        printf("\t\tNo student data available.\n");
+        _getch();
+        return;
+    }
+
+    printf("\t\tTotal Students: %d\n", total);
+    printf("\t\tAverage Final Score: %.2f\n\n", sumFinal / total);
+
+    printf("\t\t--- Highest Scorer ---\n");
+    printf("\t\tName: %s\n", topStudent.studentName);
+    printf("\t\tID: %s\n", topStudent.studentId);
+    printf("\t\tFinal Score: %.2f\n\n", highestScore);
+
+    printf("\t\t--- Lowest Scorer ---\n");
+    printf("\t\tName: %s\n", lowStudent.studentName);
+    printf("\t\tID: %s\n", lowStudent.studentId);
+    printf("\t\tFinal Score: %.2f\n\n", lowestScore);
+
+    printf("\t\t--- Department Count ---\n");
+    printf("\t\tLocal: %d\n", countLocal);
+    printf("\t\tInternational: %d\n\n", countInternational);
+
+    printf("\t\t--- Course Count ---\n");
+    printf("\t\tMSc SE: %d\n", countSE);
+    printf("\t\tMSc DSA: %d\n", countDSA);
+    printf("\t\tMSc CS: %d\n", countCS);
+    printf("\t\tMSc AIS: %d\n", countAIS);
+    printf("\t\tMSc AIMS: %d\n", countAIMS);
+
+    printf("\n\n\t\tPress any key to continue...");
+    _getch();
 }
 
 
+
+int isBlank(const char* str)
+{
+    if (str == NULL || str[0] == '\0')
+        return 1;
+
+    // Check if string is only spaces
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n')
+            return 0;
+    }
+    return 1;
+}
+
+void inputString(const char* label, char* buffer, int size)
+{
+    while (1)
+    {
+        printf("%s", label);
+        fgets(buffer, size, stdin);
+
+        buffer[strcspn(buffer, "\n")] = 0; // remove newline
+
+        if (!isBlank(buffer))
+            break;
+
+        printf("\t\t\tInput cannot be blank. Please try again.\n");
+    }
+}
+
+int idExists(const char* id)
+{
+    FILE* file = fopen("studentInfo.bin", "rb");
+    if (!file) return 0;
+
+    Student s;
+    while (fread(&s, sizeof(s), 1, file) == 1)
+    {
+        if (strcmp(s.studentId, id) == 0)
+        {
+            fclose(file);
+            return 1;
+        }
+    }
+    fclose(file);
+    return 0;
+}
+
+void chooseDepartment(Student* s)
+{
+    int choice;
+    do {
+        printf("\tSelect Dept:\n\t1. Local\n\t2. International\n\tEnter choice: ");
+        scanf("%d", &choice);
+    } while (choice < 1 || choice > 2);
+
+    strcpy(s->studentDept, (choice == 1) ? "Local" : "Int");
+}
+
+void chooseCourse(Student* s)
+{
+    int choice;
+    const char* courses[] = { "MSc SE", "MSc DSA", "MSc CS", "MSc AIS", "MSc AIMS" };
+
+    do {
+        printf("\tSelect Course:\n");
+        printf("\t1. MSc SE\n\t2. MSc DSA\n\t3. MSc CS\n\t4. MSc AIS\n\t5. MSc AIMS\n");
+        printf("\tEnter choice: ");
+        scanf("%d", &choice);
+    } while (choice < 1 || choice > 5);
+
+    strcpy(s->studentCourse, courses[choice - 1]);
+}
+
+float calculateFinal(Student s)
+{
+    return (s.marksFinalExam * 0.40f) +
+        (s.marksAssignment * 0.20f) +
+        (s.marksSmallExam * 0.20f) +
+        (s.marksTutorial * 0.20f);
+}
+
+
+
+float getValidMark(const char* label)
+{
+    float m;
+    do {
+        printf("%s (0–100): ", label);
+        scanf("%f", &m);
+    } while (m < 0 || m > 100);
+    return m;
+}
+
+void getValidAttendance(Student* s)
+{
+    printf("\tEnter Total Classes Conducted: ");
+    scanf("%d", &s->totalClasses);
+
+    do {
+        printf("\tEnter Classes Attended: ");
+        scanf("%d", &s->attendedClasses);
+    } while (s->attendedClasses < 0 || s->attendedClasses > s->totalClasses);
+}
+
+
+
+float calculateAttendance(Student s)
+{
+    if (s.totalClasses == 0) return 0;
+    return (s.attendedClasses * 100.0f) / s.totalClasses;
+}
+
+void printStudentFull(Student s)
+{
+    printf("\n\tName: %s", s.studentName);
+    printf("\n\tID: %s", s.studentId);
+    printf("\n\tDept: %s", s.studentDept);
+    printf("\n\tCourse: %s", s.studentCourse);
+    printf("\n\tAddress: %s", s.studentAddress);
+    printf("\n\tContact: %s", s.studentContactNum);
+
+    printf("\n\tAssignment: %.2f", s.marksAssignment);
+    printf("\n\tSmall Exam: %.2f", s.marksSmallExam);
+    printf("\n\tFinal Exam: %.2f", s.marksFinalExam);
+    printf("\n\tTutorial: %.2f", s.marksTutorial);
+
+    float att = calculateAttendance(s);
+    printf("\n\tAttendance: %.2f%%", att);
+
+    printf("\n\tFinal Result: %.2f\n", calculateFinal(s));
+}
+
+void printStudentRow(Student s)
+{
+    float att = calculateAttendance(s);
+
+    printf("\n%-20s %-10s %-12s %-20s %-12s %.2f%%",
+        s.studentName, s.studentId, s.studentDept,
+        s.studentAddress, s.studentContactNum, att);
+}
 
 
 
