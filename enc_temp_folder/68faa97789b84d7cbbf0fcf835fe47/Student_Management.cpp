@@ -114,7 +114,7 @@ void generateNextId(char* buffer, int size)
 }
 
 
-// Creates a new student account and saves it to the binary file.
+
 void createAccount()
 {
     FILE* fileOne = fopen("studentInfo.bin", "ab+");
@@ -163,7 +163,6 @@ void createAccount()
     fclose(fileOne);
 }
 
-// Displays all stored student records in a formatted table.
 void displayInfo()
 {
     FILE* fileOne = fopen("studentInfo.bin", "rb");
@@ -197,7 +196,6 @@ void displayInfo()
     fclose(fileOne);
 }
 
-// Updates a specific student's information based on their ID.
 void updateInfo()
 {
     FILE* fileOne = fopen("studentInfo.bin", "rb");
@@ -383,7 +381,6 @@ void updateInfo()
     _getch();
 }
 
-// Deletes a student record from the database using their ID.
 void deleteInfo()
 {
     FILE* fileOne = fopen("studentInfo.bin", "rb");
@@ -448,7 +445,6 @@ void deleteInfo()
     _getch();
 }
 
-// Searches for student information by ID or department.
 void searchInfo()
 {
     FILE* fileOne = fopen("studentInfo.bin", "rb");
@@ -571,7 +567,6 @@ void searchInfo()
     _getch();
 }
 
-// Exports all student data into a readable text (CSV-style) file.
 void exportToText()
 {
     FILE* fileOne = fopen("studentInfo.bin", "rb");
@@ -614,7 +609,6 @@ void exportToText()
     _getch();
 }
 
-// Imports edited student data from a text file and rebuilds the binary file.
 void importFromText()
 {
     FILE* in = fopen("students.txt", "r");
@@ -660,7 +654,6 @@ void importFromText()
     _getch();
 }
 
-// Generates analytics reports such as highest score, averages, and counts.
 void showReports()
 {
     FILE* file = fopen("studentInfo.bin", "rb");
@@ -775,7 +768,6 @@ int isBlank(const char* str)
     return 1;
 }
 
-// Safely inputs a non-empty string with validation.
 void inputString(const char* label, char* buffer, int size)
 {
     while (1)
@@ -792,7 +784,6 @@ void inputString(const char* label, char* buffer, int size)
     }
 }
 
-// Checks if a student ID already exists in the database.
 int idExists(const char* id)
 {
     FILE* file = fopen("studentInfo.bin", "rb");
@@ -811,7 +802,6 @@ int idExists(const char* id)
     return 0;
 }
 
-// Lets the user choose a department (Local/International).
 void chooseDepartment(Student* s)
 {
     int choice;
@@ -823,7 +813,6 @@ void chooseDepartment(Student* s)
     strcpy(s->studentDept, (choice == 1) ? "Local" : "Int");
 }
 
-// Lets the user choose a course from predefined MSc programs.
 void chooseCourse(Student* s)
 {
     int choice;
@@ -839,7 +828,6 @@ void chooseCourse(Student* s)
     strcpy(s->studentCourse, courses[choice - 1]);
 }
 
-// Calculates the final weighted score for a student.
 float calculateFinal(Student s)
 {
     return (s.marksFinalExam * 0.40f) +
@@ -849,7 +837,7 @@ float calculateFinal(Student s)
 }
 
 
-// Gets a validated mark between 0 and 100.
+
 float getValidMark(const char* label)
 {
     float m;
@@ -860,7 +848,6 @@ float getValidMark(const char* label)
     return m;
 }
 
-// Inputs and validates attendance values.
 void getValidAttendance(Student* s)
 {
     printf("\tEnter Total Classes Conducted: ");
@@ -873,14 +860,13 @@ void getValidAttendance(Student* s)
 }
 
 
-// Computes attendance percentage for a student.
+
 float calculateAttendance(Student s)
 {
     if (s.totalClasses == 0) return 0;
     return (s.attendedClasses * 100.0f) / s.totalClasses;
 }
 
-// Prints full detailed information of a student.
 void printStudentFull(Student s)
 {
     printf("\n\tName: %s", s.studentName);
@@ -901,7 +887,6 @@ void printStudentFull(Student s)
     printf("\n\tFinal Result: %.2f\n", calculateFinal(s));
 }
 
-// Prints a compact row of student info for table display.
 void printStudentRow(Student s)
 {
     float att = calculateAttendance(s);
