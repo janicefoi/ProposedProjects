@@ -66,16 +66,33 @@ void sortByDepartment(Student arr[], int n);
 void sortByCourse(Student arr[], int n);
 void displaySorted(Student arr[], int n, const char* title);
 
+// --- Authentication prototypes ---
+void initAuth();
+int login(); // returns 1 for admin, 2 for user, 0 on failure
+int authenticate(const char* username, const char* password, char* outRole, int roleSize);
+void createUser(); // simple plaintext user creation (username,password,role)
+
+// current session role: 0 = none, 1 = admin, 2 = user
+int currentRole = 0;
+
 
 
 int main()
 {
+    // initialize authentication and require login
+    initAuth();
+    while (!login()) {
+        printf("\n\tLogin failed. Try again.\n");
+    }
+
     char option = '9';
 
     while (option != '0')
     {
         system("cls");
         printf("\t\t====== Student Management Database System ======\n");
+        if (currentRole == 1) printf("\t\t[Logged in as: admin]\n");
+        else if (currentRole == 2) printf("\t\t[Logged in as: user]\n");
         printf("\n\t\t\t1. Create Student Account");
         printf("\n\t\t\t2. Display All Students Information");
         printf("\n\t\t\t3. Update Student Information");
@@ -85,7 +102,8 @@ int main()
         printf("\n\t\t\t7. Import Edited Text File");
         printf("\n\t\t\t8. Reports & Analytics");
         printf("\n\t\t\t9. Sort Students");
-        //printf("\n\t\t\t10. Backup & Restore Data"); // optional if you add option 10
+        printf("\n\t\t\tA. Manage Users (admin only)");
+       
 
 
         printf("\n\t\t\t0. Exit");
@@ -95,15 +113,35 @@ int main()
 
         switch (option)
         {
-        case '1': createAccount();   break;
+        case '1':
+            if (currentRole == 1) createAccount();
+            else printf("\n\t\t\tPermission denied. Admin only.\n");
+            break;
         case '2': displayInfo();     break;
-        case '3': updateInfo();      break;
-        case '4': deleteInfo();      break;
+        case '3':
+            if (currentRole == 1) updateInfo();
+            else printf("\n\t\t\tPermission denied. Admin only.\n");
+            break;
+        case '4':
+            if (currentRole == 1) deleteInfo();
+            else printf("\n\t\t\tPermission denied. Admin only.\n");
+            break;
         case '5': searchInfo();      break;
-        case '6': exportToText();    break;
-        case '7': importFromText();  break;
+        case '6':
+            if (currentRole == 1) exportToText();
+            else printf("\n\t\t\tPermission denied. Admin only.\n");
+            break;
+        case '7':
+            if (currentRole == 1) importFromText();
+            else printf("\n\t\t\tPermission denied. Admin only.\n");
+            break;
         case '8': showReports();     break;
         case '9': sortStudents();    break;
+        case 'A':
+        case 'a':
+            if (currentRole == 1) createUser();
+            else printf("\n\t\t\tPermission denied. Admin only.\n");
+            break;
 
 
         case '0':
@@ -407,6 +445,100 @@ void updateInfo()
     }
 
     printf("\n\n\t\t\tEnter any keys to continue.......");
+    _getch();
+}
+
+// ---------------- Authentication implementation----------------
+
+void initAuth()
+{
+    // If users file doesn't exist, create a default admin
+    FILE* f = fopen("users.txt", "r");
+    if (!f)
+    {
+        f = fopen("users.txt", "w");
+        if (f)
+        {
+            // default credentials: admin / admin
+            fprintf(f, "admin,admin,admin\n"); // username,password,role
+            fclose(f);
+            printf("Default admin created: username=admin password=admin\n");
+        }
+    }
+    else fclose(f);
+}
+
+int authenticate(const char* username, const char* password, char* outRole, int roleSize)
+{
+    FILE* f = fopen("users.txt", "r");
+    if (!f) return 0;
+    char line[256];
+    while (fgets(line, sizeof(line), f))
+    {
+        // parse username,password,role
+        char u[64], p[64], r[32];
+        if (sscanf(line, "%63[^,],%63[^,],%31[^\n]", u, p, r) >= 2)
+        {
+            if (strcmp(u, username) == 0 && strcmp(p, password) == 0)
+            {
+                if (outRole) strncpy(outRole, r, roleSize-1), outRole[roleSize-1]='\0';
+                fclose(f);
+                return 1;
+            }
+        }
+    }
+    fclose(f);
+    return 0;
+}
+
+int login()
+{
+    char username[64], password[64], role[32];
+    system("cls");
+    printf("\t\t====== Login ======\n");
+    printf("\n\tUsername: ");
+    fgets(username, sizeof(username), stdin);
+    username[strcspn(username, "\n")] = 0;
+    printf("\tPassword: ");
+    fgets(password, sizeof(password), stdin);
+    password[strcspn(password, "\n")] = 0;
+
+    if (authenticate(username, password, role, sizeof(role)))
+    {
+        if (strcmp(role, "admin") == 0) currentRole = 1;
+        else currentRole = 2;
+        return 1;
+    }
+    return 0;
+}
+
+void createUser()
+{
+    char username[64], password[64];
+    int choice = 0;
+    char role[16];
+
+    system("cls");
+    printf("\t\t====== Create User ======\n\n");
+    printf("Enter new username: ");
+    int cc; while ((cc = getchar()) != '\n' && cc != EOF);
+    fgets(username, sizeof(username), stdin);
+    username[strcspn(username, "\n")] = 0;
+    printf("Enter password: ");
+    fgets(password, sizeof(password), stdin);
+    password[strcspn(password, "\n")] = 0;
+    do {
+        printf("Select role: 1. admin  2. user\nEnter choice: ");
+        if (scanf("%d", &choice) != 1) { int c; while ((c=getchar())!='\n' && c!=EOF); choice = 0; }
+    } while (choice < 1 || choice > 2);
+    strcpy(role, choice == 1 ? "admin" : "user");
+
+    FILE* f = fopen("users.txt", "a");
+    if (!f) { printf("Error writing users file.\n"); _getch(); return; }
+    fprintf(f, "%s,%s,%s\n", username, password, role);
+    fclose(f);
+
+    printf("User created successfully.\n");
     _getch();
 }
 
