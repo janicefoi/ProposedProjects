@@ -32,6 +32,8 @@ void searchInfo();
 void exportToText();
 void importFromText();
 void showReports();
+void sortStudents();
+ 
 
 void generateNextId(char* buffer, int size);
 
@@ -46,6 +48,24 @@ void chooseDepartment(Student* s);
 void chooseCourse(Student* s);
 void printStudentFull(Student s);
 void printStudentRow(Student s);
+
+//void sortByName(Student* students, int count);
+//void sortById(Student* students, int count);
+//void sortByFinalScore(Student* students, int count);
+//void sortByAttendance(Student* students, int count);
+//void sortByDepartment(Student* students, int count);
+//void sortByCourse(Student* students, int count);
+//void displaySortedStudents(Student* students, int count);
+
+//void sortStudents();
+void sortByName(Student arr[], int n);
+void sortByID(Student arr[], int n);
+void sortByFinalScore(Student arr[], int n);
+void sortByAttendance(Student arr[], int n);
+void sortByDepartment(Student arr[], int n);
+void sortByCourse(Student arr[], int n);
+void displaySorted(Student arr[], int n, const char* title);
+
 
 
 int main()
@@ -64,6 +84,9 @@ int main()
         printf("\n\t\t\t6. Export Data to Text File");
         printf("\n\t\t\t7. Import Edited Text File");
         printf("\n\t\t\t8. Reports & Analytics");
+        printf("\n\t\t\t9. Sort Students");
+        //printf("\n\t\t\t10. Backup & Restore Data"); // optional if you add option 10
+
 
         printf("\n\t\t\t0. Exit");
 
@@ -80,6 +103,8 @@ int main()
         case '6': exportToText();    break;
         case '7': importFromText();  break;
         case '8': showReports();     break;
+        case '9': sortStudents();    break;
+
 
         case '0':
             printf("\n\t\t\t====== Thank You ======");
@@ -140,15 +165,17 @@ void createAccount()
     chooseDepartment(&studentInformation);
     chooseCourse(&studentInformation);
 
+    getchar();
+
     inputString("\tEnter Address: ", studentInformation.studentAddress, 100);
     inputString("\tEnter Contact: ", studentInformation.studentContactNum, 15);
 
 
     // Read marks with validation (0-100)
-    studentInformation.marksAssignment = getValidMark("\t\t\tEnter Assignment Marks");
-    studentInformation.marksSmallExam = getValidMark("\t\t\tEnter Small Exam Marks");
-    studentInformation.marksFinalExam = getValidMark("\t\t\tEnter Final Exam Marks");
-    studentInformation.marksTutorial = getValidMark("\t\t\tEnter Tutorial Marks");
+    studentInformation.marksAssignment = getValidMark("\tEnter Assignment Marks");
+    studentInformation.marksSmallExam = getValidMark("\tEnter Small Exam Marks");
+    studentInformation.marksFinalExam = getValidMark("\tEnter Final Exam Marks");
+    studentInformation.marksTutorial = getValidMark("\tEnter Tutorial Marks");
 
 
 
@@ -265,7 +292,7 @@ void updateInfo()
                 }
                 else if (tchoice == 2)
                 {
-                    strcpy(tempInformation.studentDept, "International");
+                    strcpy(tempInformation.studentDept, "Int");
                 }
                 else
                 {
@@ -854,7 +881,7 @@ float getValidMark(const char* label)
 {
     float m;
     do {
-        printf("%s (0–100): ", label);
+        printf("%s (0-100): ", label);
         scanf("%f", &m);
     } while (m < 0 || m > 100);
     return m;
@@ -918,6 +945,159 @@ void printStudentRow(Student s)
         finalScore,
         att);
 }
+
+// Sorts the student records based on various criteria and displays the sorted list.
+void sortStudents() {
+    FILE* file = fopen("studentInfo.bin", "rb");
+    if (!file) {
+        printf("\n\t\t\tError opening file!\n");
+        _getch();
+        return;
+    }
+
+    Student arr[500];
+    int count = 0;
+
+    while (fread(&arr[count], sizeof(Student), 1, file) == 1) {
+        count++;
+    }
+    fclose(file);
+
+    if (count == 0) {
+        printf("\n\t\t\tNo student data available.\n");
+        _getch();
+        return;
+    }
+
+    int choice;
+    do {
+        system("cls");
+        printf("\t\t====== Sort Students ======\n");
+        printf("\n\t\t1. Sort by Name (A-Z)");
+        printf("\n\t\t2. Sort by Student ID");
+        printf("\n\t\t3. Sort by Final Score (High to Low)");
+        printf("\n\t\t4. Sort by Attendance (High to Low)");
+        printf("\n\t\t5. Sort by Department");
+        printf("\n\t\t6. Sort by Course");
+        printf("\n\t\t0. Back to Main Menu");
+
+        printf("\n\n\t\tEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1: sortByName(arr, count); break;
+        case 2: sortByID(arr, count); break;
+        case 3: sortByFinalScore(arr, count); break;
+        case 4: sortByAttendance(arr, count); break;
+        case 5: sortByDepartment(arr, count); break;
+        case 6: sortByCourse(arr, count); break;
+        }
+    } while (choice != 0);
+}
+
+// Sort by Name
+void sortByName(Student arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = 0; j < n - i - 1; j++)
+            if (strcmp(arr[j].studentName, arr[j + 1].studentName) > 0) {
+                Student temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+
+    displaySorted(arr, n, "Sorted by Name (A-Z)");
+}
+
+//Sort by ID
+void sortByID(Student arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = 0; j < n - i - 1; j++)
+            if (strcmp(arr[j].studentId, arr[j + 1].studentId) > 0) {
+                Student temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+
+    displaySorted(arr, n, "Sorted by Student ID");
+}
+
+//Sort by Final Score (High → Low)
+void sortByFinalScore(Student arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = 0; j < n - i - 1; j++)
+            if (calculateFinal(arr[j]) < calculateFinal(arr[j + 1])) {
+                Student temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+
+    displaySorted(arr, n, "Sorted by Final Score (High to Low)");
+}
+
+//Sort by Attendance (High → Low)
+void sortByAttendance(Student arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = 0; j < n - i - 1; j++)
+            if (calculateAttendance(arr[j]) < calculateAttendance(arr[j + 1])) {
+                Student temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+
+    displaySorted(arr, n, "Sorted by Attendance (High to Low)");
+}
+
+//Sort by Department
+void sortByDepartment(Student arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = 0; j < n - i - 1; j++)
+            if (strcmp(arr[j].studentDept, arr[j + 1].studentDept) > 0) {
+                Student temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+
+    displaySorted(arr, n, "Sorted by Department");
+}
+
+// Sort by Course
+void sortByCourse(Student arr[], int n) {
+    for (int i = 0; i < n - 1; i++)
+        for (int j = 0; j < n - i - 1; j++)
+            if (strcmp(arr[j].studentCourse, arr[j + 1].studentCourse) > 0) {
+                Student temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+
+    displaySorted(arr, n, "Sorted by Course");
+}
+
+// Displays the sorted list of students in a formatted table.
+void displaySorted(Student arr[], int n, const char* title) {
+    system("cls");
+    printf("\t\t====== %s ======\n\n", title);
+
+    printf("\n\n\t\t| %-12s %-10s %-16s %-8s %-16s %-11s %10s %8s |\n",
+        "Name", "ID", "Address", "Dept", "Course", "Contact", "Final", "Attend%");
+
+    printf("\t\t+------------------------------------------------------------------------------------+\n");
+
+    /*printf("\n\n\t\t| %-12s %-10s %-16s %-8s %-16s  %-11s %10s %8s |\n",
+        "Name", "ID", "Address", "Dept", "Course", "Contact", "Final", "Attend%");
+
+    printf("\t\t+------------------------------------------------------------------------------------+\n");*/
+
+    for (int i = 0; i < n; i++) {
+        printStudentRow(arr[i]);
+    }
+
+    printf("\n\n\t\tPress any key to continue...");
+    _getch();
+}
+
+
+
 
 
 
